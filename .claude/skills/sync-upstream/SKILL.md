@@ -86,6 +86,7 @@ Each of these must hold; fix and re-check if not:
 - `.github/workflows/fork-release.yml` still matches `build.yml`: every input it
   passes (`platform`, `target`, `build-args`, `sign-binaries`, `asset-prefix`,
   `upload-artifacts`, `release-id`, `ref`) must still exist, with the same type.
+- `README.md` still opens with the fork banner above `# Handy`, and `FORK.md`'s "Differences from upstream" is still accurate.
 - A behavior change in the transcription path that cloud mode bypasses (new
   text post-processing inside `TranscriptionManager`, new gates in `start()`)
   is worth flagging to the user even when it compiles.

@@ -3,6 +3,13 @@
 Changes in this fork that upstream Handy does not have. Keep them small so
 merging `upstream/main` stays easy. The `sync-upstream` skill (`.claude/skills/sync-upstream`) does the merge and the checks.
 
+## Differences from upstream
+
+- **Cloud transcription (opt-in):** an OpenRouter speech-to-text model can replace local inference. Off by default. While on, recordings are uploaded to OpenRouter and the model's provider. Set up on the Models page: paste a key, load the model list, pick one, switch it on. Your local model selection is kept, so switching off returns to local.
+- **Language:** a selected language is sent as its two-letter code; with "auto" it is sent only if exactly one spoken language is set, otherwise the provider detects it.
+- **Not applied in cloud mode:** live streaming text, custom words, filler-word removal, Chinese-script conversion. `--transcribe-file` stays local.
+- **Updates and releases:** the updater reads this fork's GitHub Releases and verifies the fork's own signing key, so a fork build never installs upstream's. Releases are Linux `.deb` only.
+
 ## Cloud transcription (OpenRouter)
 
 All the logic lives in files upstream never touches:

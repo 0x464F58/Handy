@@ -1,3 +1,10 @@
+> **Unofficial fork** of [cjpais/Handy](https://github.com/cjpais/Handy), not affiliated with or supported by upstream. Differences:
+>
+> - **Opt-in cloud transcription via OpenRouter** (Models page). While it is on, your audio is uploaded to OpenRouter and the model's provider, unlike the offline behavior described below. It is off by default.
+> - **Updates come from this fork's [releases](https://github.com/0x464F58/Handy/releases)**, signed with the fork's own key. Builds are Linux `.deb` only.
+>
+> Details and limits: [FORK.md](FORK.md).
+
 # Handy
 
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/WVBeWsNXK4)
