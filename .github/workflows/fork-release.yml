@@ -1,0 +1,81 @@
+name: "Fork Release"
+
+# Fork-only: builds the Linux .deb and publishes it, with the updater's
+# latest.json, as a draft release on this repository. Publish the draft to
+# roll it out to installed copies. Leaves upstream's release.yml untouched.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Fork version, e.g. 0.10.0-fork.1. Must sort above the installed one."
+        required: true
+        type: string
+
+jobs:
+  prepare:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    outputs:
+      release-id: ${{ steps.create-release.outputs.result }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-fork\.[0-9]+$ ]]; then
+            echo "Version must look like 0.10.0-fork.1, got: $VERSION" >&2
+            exit 1
+          fi
+
+      # The updater only installs a strictly newer version, so each release
+      # needs its own. Patching it on a tagged commit keeps the version files
+      # identical to upstream's on the branch, so rebases don't conflict on them.
+      - name: Tag a commit that carries the version
+        id: tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          sed -i -E '0,/"version": "[^"]*"/s//"version": "'"$VERSION"'"/' src-tauri/tauri.conf.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: fork release $VERSION"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create draft release
+        id: create-release
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ steps.tag.outputs.tag }}',
+              name: '${{ steps.tag.outputs.tag }}',
+              draft: true,
+              prerelease: false,
+              generate_release_notes: true
+            })
+            return data.id
+
+  build:
+    permissions:
+      contents: write
+    needs: prepare
+    uses: ./.github/workflows/build.yml
+    with:
+      platform: "ubuntu-22.04"
+      target: "x86_64-unknown-linux-gnu"
+      build-args: "--bundles deb"
+      sign-binaries: true
+      asset-prefix: "handy"
+      upload-artifacts: false
+      release-id: ${{ needs.prepare.outputs.release-id }}
+      ref: ${{ needs.prepare.outputs.tag }}
+    secrets: inherit
