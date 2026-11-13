@@ -8,6 +8,7 @@ mod catalog;
 mod chinese_script;
 pub mod cli;
 mod clipboard;
+mod cloud_stt;
 mod commands;
 pub mod engine_supervisor;
 mod helpers;
@@ -837,7 +838,7 @@ pub fn run(cli_args: CliArgs) {
         )
         .expect("Failed to export typescript bindings");
 
-    let invoke_handler = specta_builder.invoke_handler();
+    let invoke_handler = cloud_stt::chain(specta_builder.invoke_handler());
 
     // The headless path must run as its own instance (see the single-instance
     // note below), not forward to an already-running app.

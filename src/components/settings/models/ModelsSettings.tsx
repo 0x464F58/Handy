@@ -9,6 +9,7 @@ import {
   useModelFilters,
   type TableSection,
 } from "@/components/shared/modelTable/ModelTable";
+import { CloudTranscription } from "@/components/cloud-stt/CloudTranscription";
 import RetiredModelsNotice from "./RetiredModelsNotice";
 import { ModelRow } from "./ModelRow";
 import { Legend } from "./Legend";
@@ -153,6 +154,9 @@ export const ModelsSettings: React.FC<ModelsSettingsProps> = ({
       </div>
       <div className="mx-[12px] mb-[16px] flex-none empty:hidden">
         <RetiredModelsNotice />
+      </div>
+      <div className="mx-[12px] mb-[16px] flex-none">
+        <CloudTranscription />
       </div>
       <ModelTable
         grading={facts}
