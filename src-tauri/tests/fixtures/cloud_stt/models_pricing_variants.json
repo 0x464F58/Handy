@@ -1,0 +1,97 @@
+{
+ "data": [
+  {
+   "id": "microsoft/mai-transcribe-1.5",
+   "canonical_slug": "microsoft/mai-transcribe-1.5",
+   "hugging_face_id": null,
+   "name": "Microsoft AI: MAI-Transcribe 1.5",
+   "created": 1780425095,
+   "description": "MAI-Transcribe 1.5 is a multilingual speech-to-text model from Microsoft AI. It is suited for captions, call transcription, subtitling, accessibility, and other voice-enabled applications, with reliable transcription across 43 languages, diverse...",
+   "context_length": 0,
+   "architecture": {
+    "modality": "audio->transcription",
+    "input_modalities": [
+     "audio"
+    ],
+    "output_modalities": [
+     "transcription"
+    ],
+    "tokenizer": "Other",
+    "instruct_type": null
+   },
+   "pricing": {
+    "prompt": "0.36",
+    "completion": "0"
+   },
+   "top_provider": {
+    "context_length": 0,
+    "max_completion_tokens": 0,
+    "is_moderated": false
+   },
+   "per_request_limits": null,
+   "supported_parameters": [],
+   "default_parameters": {},
+   "supported_voices": null,
+   "knowledge_cutoff": null,
+   "expiration_date": "2026-12-22",
+   "links": {
+    "details": "/api/v1/models/microsoft/mai-transcribe-1.5/endpoints"
+   },
+   "endpoints": [
+    "/api/v1/audio/transcriptions"
+   ]
+  },
+  {
+   "id": "openai/gpt-4o-transcribe",
+   "canonical_slug": "openai/gpt-4o-transcribe",
+   "hugging_face_id": null,
+   "name": "OpenAI: GPT-4o Transcribe",
+   "created": 1777332895,
+   "description": "GPT-4o Transcribe is OpenAI's high-quality speech-to-text model built on GPT-4o audio capabilities. It's priced per token (input and output), making it suitable for workflows that benefit from token-level billing transparency.",
+   "context_length": 128000,
+   "architecture": {
+    "modality": "audio->transcription",
+    "input_modalities": [
+     "audio"
+    ],
+    "output_modalities": [
+     "transcription"
+    ],
+    "tokenizer": "GPT",
+    "instruct_type": null
+   },
+   "pricing": {
+    "prompt": "0.0000025",
+    "completion": "0.00001"
+   },
+   "top_provider": {
+    "context_length": 128000,
+    "max_completion_tokens": 115200,
+    "is_moderated": true
+   },
+   "per_request_limits": null,
+   "supported_parameters": [],
+   "default_parameters": {
+    "temperature": null,
+    "top_p": null,
+    "top_k": null,
+    "frequency_penalty": null,
+    "presence_penalty": null,
+    "repetition_penalty": null
+   },
+   "supported_voices": null,
+   "knowledge_cutoff": null,
+   "expiration_date": null,
+   "links": {
+    "details": "/api/v1/models/openai/gpt-4o-transcribe/endpoints"
+   },
+   "endpoints": [
+    "/api/v1/audio/transcriptions"
+   ]
+  }
+ ],
+ "total_count": 31,
+ "links": {
+  "next": null
+ }
+}

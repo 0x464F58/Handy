@@ -44,6 +44,8 @@ interface Status {
 interface CloudModel {
   id: string;
   name: string;
+  /** e.g. "$0.36/h"; null when the provider lists no price. */
+  price: string | null;
 }
 
 export const CloudTranscription: React.FC = () => {
@@ -87,7 +89,10 @@ export const CloudTranscription: React.FC = () => {
 
   if (!status) return null;
 
-  const options = models.map((m) => ({ value: m.id, label: m.name }));
+  const options = models.map((m) => ({
+    value: m.id,
+    label: m.price ? `${m.name} (${m.price})` : m.name,
+  }));
   // Show the saved pick even before the list has been loaded this session.
   if (status.model && !options.some((o) => o.value === status.model)) {
     options.unshift({ value: status.model, label: status.model });

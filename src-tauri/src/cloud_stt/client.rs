@@ -20,6 +20,48 @@ const TRANSCRIBE_TIMEOUT: Duration = Duration::from_secs(120);
 pub struct CloudModel {
     pub id: String,
     pub name: String,
+    /// Short price tag for the picker, e.g. "$0.36/h". `None` if unpriced.
+    pub price: Option<String>,
+}
+
+/// The tag for a model's `prompt`/`completion` prices as the provider lists
+/// them (strings, USD). The list has no unit field: duration-priced models
+/// give USD per second, token-priced ones USD per token, and a few give USD
+/// per hour directly.
+pub fn price_label(prompt: &str, completion: &str) -> Option<String> {
+    let prompt: f64 = prompt.parse().ok()?;
+    let completion: f64 = completion.parse().unwrap_or(0.0);
+    if prompt == 0.0 && completion == 0.0 {
+        return Some("free".to_string());
+    }
+    if completion > 0.0 {
+        let per_million = |price: f64| trim_zeros(format!("{:.2}", price * 1e6));
+        return Some(format!(
+            "${} in / ${} out per 1M tokens",
+            per_million(prompt),
+            per_million(completion)
+        ));
+    }
+    // No real per-second price comes near a cent, so a value this large was
+    // already given per hour.
+    let per_hour = if prompt >= 0.01 {
+        prompt
+    } else {
+        prompt * 3600.0
+    };
+    Some(if per_hour < 0.005 {
+        "<$0.01/h".to_string()
+    } else {
+        format!("${per_hour:.2}/h")
+    })
+}
+
+/// "10.00" -> "10", "2.50" -> "2.5".
+fn trim_zeros(value: String) -> String {
+    value
+        .trim_end_matches('0')
+        .trim_end_matches('.')
+        .to_string()
 }
 
 /// The language to pin the provider to, from Handy's language settings.
@@ -104,9 +146,14 @@ pub fn parse_models(body: &str) -> Result<Vec<CloudModel>> {
         .filter_map(|m| {
             let id = m["id"].as_str()?;
             let name = m["name"].as_str().unwrap_or(id);
+            let pricing = &m["pricing"];
             Some(CloudModel {
                 id: id.to_string(),
                 name: name.to_string(),
+                price: price_label(
+                    pricing["prompt"].as_str().unwrap_or_default(),
+                    pricing["completion"].as_str().unwrap_or_default(),
+                ),
             })
         })
         .collect())
@@ -278,6 +325,56 @@ mod tests {
         assert_eq!(models.len(), 4);
         let whisper = models.iter().find(|m| m.id == "openai/whisper-1").unwrap();
         assert!(!whisper.name.is_empty());
+    }
+
+    const PRICING_VARIANTS: &str =
+        include_str!("../../tests/fixtures/cloud_stt/models_pricing_variants.json");
+
+    fn price_of(models: &[CloudModel], id: &str) -> Option<String> {
+        models.iter().find(|m| m.id == id).unwrap().price.clone()
+    }
+
+    #[test]
+    fn per_second_prices_become_dollars_per_hour() {
+        let models = parse_models(MODELS_OK).unwrap();
+        assert_eq!(
+            price_of(&models, "openai/whisper-1"),
+            Some("$0.36/h".into())
+        );
+        assert_eq!(
+            price_of(&models, "x-ai/grok-stt-2.0"),
+            Some("$0.10/h".into())
+        );
+        assert_eq!(
+            price_of(&models, "mistralai/voxtral-mini-transcribe-3-0"),
+            Some("$0.21/h".into())
+        );
+    }
+
+    #[test]
+    fn prices_already_per_hour_are_kept() {
+        let models = parse_models(PRICING_VARIANTS).unwrap();
+        assert_eq!(
+            price_of(&models, "microsoft/mai-transcribe-1.5"),
+            Some("$0.36/h".into())
+        );
+    }
+
+    #[test]
+    fn token_priced_models_show_per_million_rates() {
+        let models = parse_models(PRICING_VARIANTS).unwrap();
+        assert_eq!(
+            price_of(&models, "openai/gpt-4o-transcribe"),
+            Some("$2.5 in / $10 out per 1M tokens".into())
+        );
+    }
+
+    #[test]
+    fn free_unpriced_and_tiny_prices() {
+        assert_eq!(price_label("0", "0"), Some("free".into()));
+        assert_eq!(price_label("", ""), None);
+        assert_eq!(price_label("n/a", "0"), None);
+        assert_eq!(price_label("0.000001", "0"), Some("<$0.01/h".into()));
     }
 
     struct Captured {
