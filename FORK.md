@@ -1,7 +1,7 @@
 # Fork notes
 
 Changes in this fork that upstream Handy does not have. Keep them small so
-`git rebase upstream/main` stays easy.
+merging `upstream/main` stays easy. The `sync-upstream` skill (`.claude/skills/sync-upstream`) does the merge and the checks.
 
 ## Cloud transcription (OpenRouter)
 
@@ -11,7 +11,7 @@ All the logic lives in files upstream never touches:
 - `src/components/cloud-stt/CloudTranscription.tsx` – settings panel and its English strings
 - `src-tauri/tests/fixtures/cloud_stt/` – responses recorded from the live API
 
-Touch points in upstream files. After a rebase conflict, re-apply these and nothing more:
+Touch points in upstream files. After a merge conflict, re-apply these and nothing more:
 
 | File                                                | Change                                                                                                                                                                                                         |
 | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,3 +39,5 @@ The app updates from this fork's GitHub Releases, signed with the fork's own key
 - **Release:** run "Fork Release" (Actions tab, or `gh workflow run fork-release.yml -f version=0.10.0-fork.1`), check the draft, then publish it. Releases must not be marked prerelease, or `latest` skips them.
 - **Versions:** use `<upstream version>-fork.N`. The workflow patches the version on a tagged commit, so no version bumps are committed. Each release must be higher than the one installed; after rebasing onto a newer upstream, restart at `-fork.1` of that version.
 - **Installing the update:** the app runs `dpkg -i` via `pkexec`. If a new dependency was added, run `sudo apt --fix-broken install`.
+
+`.claude/` is gitignored upstream, so the skill was added with `git add -f`; it stays tracked.
